@@ -1,0 +1,43 @@
+name: noip-duc
+summary: noip Dynamic Update Client
+description: |
+  noip Dynamic Update Client(DUC)
+  DUC client for https://www.noip.com
+
+type: app
+base: core24
+adopt-info: duc
+license: Apache-2.0
+
+platforms:
+  amd64:
+  armhf:
+  arm64:
+
+confinement: strict
+grade: stable
+
+apps:
+  noip-duc:
+    command: usr/bin/noip-duc-wrapper --help
+
+  duc:
+    command: usr/bin/noip-duc-wrapper
+    install-mode: disable
+    daemon: simple
+    plugs:
+      - network
+
+parts:
+  duc:
+    plugin: nil
+    override-build: |
+      wget --content-disposition https://www.noip.com/download/linux/latest
+      version=$(ls noip-duc_*.tar.gz | awk -F '_' '{print substr($2,1,length($2)-7)}')
+      tar -xf noip-duc_${version}.tar.gz
+      dpkg -x noip-duc_${version}/binaries/noip-duc_${version}_${CRAFT_ARCH_BUILD_FOR}.deb ${CRAFT_PART_INSTALL}
+      craftctl set version="${version}"
+      install -m 755
+
+build-packages:
+  - wget
