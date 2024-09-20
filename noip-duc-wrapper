@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# handle --help as special case
+
+
+print_help() {
+  echo -e "${SNAP_NAME} supports configuration through the snap config"
+  echo -e "\tSnap configuration support all the options that are supported through environment variables."
+  echo -e "\tEnvironment variabled can be set as:"
+  echo -e "\t\t$ snap set ${SNAP_NAME} duc.env.<key-name> ""'<ENV-NAME>=<env-value>'"
+  echo -e "\t\te.g. $ snap set ${SNAP_NAME} duc.env.username "'NOIP_USERNAME="ubuntu"'
+  echo -e ""
+  echo -e "Congigurable options as supported by Dynanic Update Client."
+  echo -e 'Options with "[env: XXXXXX=]" are supported, e.g. "[env: NOIP_HTTP_TIMEOUT=]"'
+  "${SNAP}"/usr/bin/noip-duc --help
+}
+
+if [ "${1}" = "--help" ]; then
+  print_help
+else
+  [ -e "${SNAP_COMMON}/etc/no-ip2.conf" ] && source "${SNAP_COMMON}/etc/no-ip2.conf"
+  "${SNAP}"/usr/bin/noip-duc ${@}
+fi

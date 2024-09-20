@@ -37,7 +37,7 @@ parts:
       tar -xf noip-duc_${version}.tar.gz
       dpkg -x noip-duc_${version}/binaries/noip-duc_${version}_${CRAFT_ARCH_BUILD_FOR}.deb ${CRAFT_PART_INSTALL}
       craftctl set version="${version}"
-      install -m 755
+      install -m 755 ${CRAFT_PROJECT_DIR}/noip-duc-wrapper ${CRAFT_PART_INSTALL}/usr/bin/noip-duc-wrapper
 
 build-packages:
   - wget
