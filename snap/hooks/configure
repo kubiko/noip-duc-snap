@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# if config contains following settings, enable DUC service
+# - hostnames
+# - username
+# - password
+#
+# Format of DUC  json configuration:
+# { "duc": {
+#       "env" : {
+#           "username":  "NOIP_USERNAME=ubuntu",
+#           "password":  "NOIP_PASSWORD=ubuntu",
+#           "hostnames": "NOIP_HOSTNAMES=ubuntu.ubuntu.com"
+#       }
+# }
+
+# reset env file
+mkdir -p ${SNAP_COMMON}/etc
+echo "# noip Dynamic Update Client configuration file" > ${SNAP_COMMON}/etc/no-ip2.conf
+env_usr_pass_hosts=0
+for e in $(snapctl get -t duc.env | \
+             awk '{gsub( /,/ ,"",$2);gsub(/\\"/,"\"",$2); print substr($2,2,length($2)-2)}')
+do
+  key=$(echo "${e}" | awk -F '=' '{print $1}')
+  echo "export ${e}" >> "${SNAP_COMMON}"/etc/no-ip2.conf
+  if [ "${key}" = "NOIP_USERNAME" ] || [ "${key}" = "NOIP_PASSWORD" ] || [ "${key}" = "NOIP_HOSTNAMES" ]; then
+    env_usr_pass_hosts=$((env_usr_pass_hosts+1))
+  fi
+done
+
+# should service be enabled
+if [ ${env_usr_pass_hosts} = "3" ]; then
+  if [ -z "$(snapctl services "${SNAP_INSTANCE_NAME}".duc | grep "active")" ]; then
+    snapctl start --enable "${SNAP_INSTANCE_NAME}".duc
+  else
+    snapctl restart "${SNAP_INSTANCE_NAME}".duc
+  fi
+fi
